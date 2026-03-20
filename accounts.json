@@ -1,15 +1,15 @@
 [
-  { "name": "Flower Time",       "account_id": "act_1049653920640376" },
-  { "name": "Séfora Lencería",   "account_id": "act_177210843" },
-  { "name": "IKA Indumentaria",         "account_id": "act_746471687664190" },
-  { "name": "Meryjane Clothing",         "account_id": "act_178125267384031" },
-  { "name": "Nonna Vita",        "account_id": "act_612229901780545" },
-  { "name": "Hey Donuts",        "account_id": "act_2865136010301361" },
-  { "name": "Techos JAC",        "account_id": "act_1198289701207758" },
-  { "name": "Dr. Gonzalo García","account_id": "act_166532485358915" },
-  { "name": "Salón del Peinador","account_id": "act_374906411205561" },
-  { "name": "Kitana Lencería",   "account_id": "act_761894293533364" },
-  { "name": "DLD Translation HUB","account_id": "act_297655496323650" },
-  { "name": "Damian Pelu",       "account_id": "act_492975786864046" },
-  { "name": "Casa Fuegos",    "account_id": "act_2642860122588371" }
+  { "name": "Flower Time",        "account_id": "act_1049653920640376", "type": "both" },
+  { "name": "Séfora Lencería",    "account_id": "act_177210843",        "type": "both" },
+  { "name": "IKA Indumentaria",   "account_id": "act_746471687664190",  "type": "ecommerce" },
+  { "name": "Meryjane Clothing",  "account_id": "act_178125267384031",  "type": "ecommerce" },
+  { "name": "Kitana Lencería",    "account_id": "act_761894293533364",  "type": "ecommerce" },
+  { "name": "Salón del Peinador", "account_id": "act_374906411205561",  "type": "ecommerce" },
+  { "name": "Nonna Vita",         "account_id": "act_612229901780545",  "type": "conversation" },
+  { "name": "Hey Donuts",         "account_id": "act_2865136010301361", "type": "conversation" },
+  { "name": "Techos JAC",         "account_id": "act_1198289701207758", "type": "conversation" },
+  { "name": "Dr. Gonzalo García", "account_id": "act_166532485358915",  "type": "conversation" },
+  { "name": "DLD Translation HUB","account_id": "act_297655496323650",  "type": "conversation" },
+  { "name": "Damian Pelu",        "account_id": "act_492975786864046",  "type": "conversation" },
+  { "name": "Casa Fuegos",        "account_id": "act_2642860122588371", "type": "conversation" }
 ]
