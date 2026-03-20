@@ -63,7 +63,7 @@ def publish_report(report: dict) -> str:
     period = report.get("period_label", "")
     account_type = report.get("account_type", "ecommerce")
 
-    title = f"{emoji} {name} — {period}"
+    title = f"{name} — {period}"
 
     s = report.get("summary", {})
     ec = report.get("ecommerce", {})
@@ -161,17 +161,18 @@ def publish_report(report: dict) -> str:
         "title": {"title": [{"text": {"content": title}}]},
     }
 
-    # Intentar asignar propiedades opcionales si existen en la DB
+    # Crear página con ícono como emoji de página (no en el título)
     try:
         page = notion.pages.create(
             parent={"database_id": NOTION_REPORTS_DATABASE_ID},
+            icon={"type": "emoji", "emoji": emoji},
             properties=properties,
             children=blocks,
         )
     except Exception:
-        # Fallback sin propiedades extra
         page = notion.pages.create(
             parent={"database_id": NOTION_REPORTS_DATABASE_ID},
+            icon={"type": "emoji", "emoji": emoji},
             properties={"title": {"title": [{"text": {"content": title}}]}},
             children=blocks,
         )
