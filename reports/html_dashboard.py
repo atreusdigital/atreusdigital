@@ -340,11 +340,11 @@ function getCSS(v) { return getComputedStyle(document.documentElement).getProper
 function gridColor() { return getCSS('--border'); }
 function textColor() { return getCSS('--muted'); }
 
-// Format
-function fmt(n) { return '$' + n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function num(n) { return n.toLocaleString('es-AR'); }
+// Format — sin decimales
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+function num(n) { return Math.round(n).toLocaleString('es-AR'); }
 function pct(n) { return n > 0 ? n + '%' : '—'; }
-function dash(n) { return n > 0 ? n : '—'; }
+function dash(n) { return n > 0 ? num(n) : '—'; }
 
 function roas_badge(r) {
   if (!r || r === 0) return '<span style="color:var(--muted)">—</span>';
@@ -380,49 +380,45 @@ function render_panel(acc, idx) {
   // ── MÉTRICAS GENERALES ──
   let gen_cards = `
     <div class="mcard"><div class="mlabel">Inversión</div><div class="mval">${fmt(s.spend)}</div></div>
-    <div class="mcard"><div class="mlabel">Alcance</div><div class="mval c-purple">${num(s.reach || 0)}</div></div>
     <div class="mcard"><div class="mlabel">Impresiones</div><div class="mval">${num(s.impressions)}</div></div>
+    <div class="mcard"><div class="mlabel">Clics</div><div class="mval">${num(s.clicks)}</div></div>
     <div class="mcard"><div class="mlabel">CTR</div><div class="mval ${s.ctr >= 2.5 ? 'c-green' : s.ctr >= 1.5 ? 'c-yellow' : 'c-red'}">${s.ctr}%</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(s.ctr/5*100,100)}%;background:var(--${s.ctr >= 2.5 ? 'green' : s.ctr >= 1.5 ? 'yellow' : 'red'})"></div></div>
     </div>
-    <div class="mcard"><div class="mlabel">CPM</div><div class="mval">${fmt(s.cpm)}</div></div>
-    <div class="mcard"><div class="mlabel">Frecuencia</div><div class="mval ${s.frequency > 3.5 ? 'c-red' : s.frequency > 2 ? 'c-yellow' : 'c-green'}">${s.frequency || '—'}</div><div class="msub">veces por persona</div></div>`;
+    <div class="mcard"><div class="mlabel">CPM</div><div class="mval">${fmt(s.cpm)}</div></div>`;
 
-  if (s.hook_rate > 0) {
-    gen_cards += `<div class="mcard featured"><div class="mlabel">🎣 Hook Rate</div><div class="mval ${s.hook_rate >= 40 ? 'c-green' : s.hook_rate >= 25 ? 'c-yellow' : 'c-red'}">${s.hook_rate}%</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(s.hook_rate*2,100)}%;background:var(--${s.hook_rate >= 40 ? 'green' : s.hook_rate >= 25 ? 'yellow' : 'red'})"></div></div>
-    </div>`;
-    if (s.hold_rate > 0) {
-      gen_cards += `<div class="mcard"><div class="mlabel">⏱️ Hold Rate</div><div class="mval ${s.hold_rate >= 50 ? 'c-green' : s.hold_rate >= 30 ? 'c-yellow' : 'c-red'}">${s.hold_rate}%</div></div>`;
-    }
+  if (s.frequency > 0) {
+    gen_cards += `<div class="mcard"><div class="mlabel">Frecuencia</div><div class="mval ${s.frequency > 3.5 ? 'c-red' : s.frequency > 2 ? 'c-yellow' : 'c-green'}">${s.frequency}</div><div class="msub">veces por persona</div></div>`;
+  }
+  if (s.reach > 0) {
+    gen_cards += `<div class="mcard"><div class="mlabel">Alcance</div><div class="mval c-purple">${num(s.reach)}</div></div>`;
   }
 
   let primary_cards = '';
 
-  // eCommerce metrics
-  if (type === 'ecommerce' || type === 'both') {
-    primary_cards += `
-      <div class="mcard featured"><div class="mlabel">ROAS</div><div class="mval ${roas_color(s.roas)}">${s.roas > 0 ? s.roas+'x' : '—'}</div></div>
-      <div class="mcard"><div class="mlabel">Compras</div><div class="mval c-green">${ec.purchases > 0 ? num(ec.purchases) : '—'}</div></div>
-      <div class="mcard"><div class="mlabel">Ticket promedio</div><div class="mval c-orange">${ec.ticket_promedio > 0 ? fmt(ec.ticket_promedio) : '—'}</div><div class="msub">valor de compra</div></div>
-      <div class="mcard"><div class="mlabel">Revenue</div><div class="mval c-yellow">${ec.purchase_value > 0 ? fmt(ec.purchase_value) : '—'}</div></div>`;
+  // eCommerce metrics — solo si hay datos
+  if ((type === 'ecommerce' || type === 'both') && s.roas > 0) {
+    primary_cards += `<div class="mcard featured"><div class="mlabel">ROAS</div><div class="mval ${roas_color(s.roas)}">${s.roas}x</div></div>`;
+    if (ec.purchases > 0) primary_cards += `<div class="mcard"><div class="mlabel">Compras</div><div class="mval c-green">${num(ec.purchases)}</div></div>`;
+    if (ec.ticket_promedio > 0) primary_cards += `<div class="mcard"><div class="mlabel">Ticket promedio</div><div class="mval c-orange">${fmt(ec.ticket_promedio)}</div></div>`;
+    if (ec.purchase_value > 0) primary_cards += `<div class="mcard"><div class="mlabel">Revenue</div><div class="mval c-yellow">${fmt(ec.purchase_value)}</div></div>`;
   }
 
-  // Conversation metrics
-  if (type === 'conversation' || type === 'both') {
+  // Conversation metrics — solo si hay datos
+  if ((type === 'conversation' || type === 'both') && cv.conversations > 0) {
     primary_cards += `
-      <div class="mcard featured"><div class="mlabel">Conversaciones</div><div class="mval c-blue">${cv.conversations > 0 ? num(cv.conversations) : '—'}</div></div>
+      <div class="mcard featured"><div class="mlabel">Conversaciones</div><div class="mval c-blue">${num(cv.conversations)}</div></div>
       <div class="mcard"><div class="mlabel">Costo / conversación</div><div class="mval c-blue">${cv.cost_per_conversation > 0 ? fmt(cv.cost_per_conversation) : '—'}</div></div>`;
   }
 
-  // Instagram metrics
-  const ig_cards = `
-    <div class="mcard"><div class="mlabel">👁️ Visitas al perfil</div><div class="mval c-pink">${dash(ig.profile_visits)}</div></div>
-    <div class="mcard"><div class="mlabel">➕ Seguimientos</div><div class="mval c-pink">${dash(ig.follows)}</div></div>
-    <div class="mcard"><div class="mlabel">💰 Costo/seguidor</div><div class="mval c-pink">${ig.cost_per_follow > 0 ? fmt(ig.cost_per_follow) : '—'}</div></div>
-    <div class="mcard"><div class="mlabel">📊 % seguidor</div><div class="mval c-pink">${ig.follow_rate_pct > 0 ? ig.follow_rate_pct+'%' : '—'}</div></div>`;
-
-  const ig_note = `<div class="ig-note">ℹ️ Las métricas de Instagram muestran interacciones generadas directamente por los anuncios. Para métricas orgánicas (seguidores totales, alcance orgánico) se requiere conectar la Instagram Graph API.</div>`;
+  // Instagram — solo si hay datos reales
+  let ig_cards = '';
+  if (ig.profile_visits > 0) ig_cards += `<div class="mcard"><div class="mlabel">👁️ Visitas al perfil</div><div class="mval c-pink">${num(ig.profile_visits)}</div></div>`;
+  if (ig.follows > 0) {
+    ig_cards += `<div class="mcard"><div class="mlabel">➕ Seguimientos</div><div class="mval c-pink">${num(ig.follows)}</div></div>`;
+    ig_cards += `<div class="mcard"><div class="mlabel">💰 Costo/seguidor</div><div class="mval c-pink">${fmt(ig.cost_per_follow)}</div></div>`;
+    ig_cards += `<div class="mcard"><div class="mlabel">% seguidor</div><div class="mval c-pink">${ig.follow_rate_pct}%</div></div>`;
+  }
 
   const metrics_section = `
     <div class="section">
@@ -436,33 +432,28 @@ function render_panel(acc, idx) {
       <div class="metrics-grid">${primary_cards}</div>
     </div>` : '';
 
-  const ig_section = `
+  const ig_section = ig_cards ? `
     <div class="section">
       <div class="section-title">Instagram (desde anuncios)</div>
       <div class="metrics-grid">${ig_cards}</div>
-      ${ig_note}
-    </div>`;
+    </div>` : '';
 
   // ── CHARTS ──
   const names = camps.map(c => c.name.length > 20 ? c.name.substring(0,20)+'…' : c.name);
   const spends = camps.map(c => c.spend);
   const roas_vals = camps.map(c => c.roas);
   const ctrs = camps.map(c => c.ctr);
-  const hooks = camps.map(c => c.hook_rate || 0);
-  const total_spend = spends.reduce((a,b) => a+b, 0);
+  const has_roas = roas_vals.some(r => r > 0);
 
   const charts_section = `
     <div class="section">
-      <div class="section-title">Distribución de presupuesto & performance</div>
+      <div class="section-title">Performance por campaña</div>
       <div class="charts-3">
         <div class="chart-card"><h3>Inversión por campaña</h3><canvas id="cs-${idx}" height="220"></canvas></div>
         <div class="chart-card"><h3>Distribución del spend</h3><canvas id="cd-${idx}" height="220"></canvas></div>
         <div class="chart-card"><h3>CTR por campaña</h3><canvas id="cc-${idx}" height="220"></canvas></div>
       </div>
-      <div class="charts-2" style="margin-top:16px">
-        <div class="chart-card"><h3>ROAS por campaña</h3><canvas id="cr-${idx}" height="180"></canvas></div>
-        <div class="chart-card"><h3>🎣 Hook Rate por campaña</h3><canvas id="ch-${idx}" height="180"></canvas></div>
-      </div>
+      ${has_roas ? `<div class="charts-2" style="margin-top:16px"><div class="chart-card"><h3>ROAS por campaña</h3><canvas id="cr-${idx}" height="180"></canvas></div><div class="chart-card"><h3>Inversión vs CTR</h3><canvas id="cb-${idx}" height="180"></canvas></div></div>` : ''}
     </div>`;
 
   // ── TABLA CAMPAÑAS ──
@@ -526,7 +517,7 @@ function render_panel(acc, idx) {
 
   return {
     html: banner + metrics_section + primary_section + ig_section + charts_section + camp_section + ads_section + recs_section,
-    chart_data: { names, spends, roas_vals, ctrs, hooks, total_spend }
+    chart_data: { names, spends, roas_vals, ctrs, has_roas }
   };
 }
 
@@ -567,7 +558,7 @@ function buildCharts() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const COLORS = ['#7c5cfc','#00d4aa','#ffd166','#4ea8de','#ff9f43','#fd79a8','#a29bfe'];
 
-  all_chart_data.forEach(({ idx, names, spends, roas_vals, ctrs, hooks, total_spend }) => {
+  all_chart_data.forEach(({ idx, names, spends, roas_vals, ctrs, has_roas }) => {
     const opts_base = {
       responsive: true,
       plugins: { legend: { display: false } },
@@ -582,8 +573,8 @@ function buildCharts() {
     if (csEl) {
       chartInstances['cs'+idx] = new Chart(csEl, {
         type: 'bar',
-        data: { labels: names, datasets: [{ data: spends, backgroundColor: COLORS.map((c,i) => COLORS[i % COLORS.length] + 'bb'), borderRadius: 6 }] },
-        options: { ...opts_base, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, font: { size: 10 } }, grid: { color: grid } }, y: { ticks: { color: txt, font: { size: 10 } }, grid: { color: 'transparent' } } } }
+        data: { labels: names, datasets: [{ data: spends, backgroundColor: names.map((_,i) => COLORS[i % COLORS.length] + 'bb'), borderRadius: 6 }] },
+        options: { ...opts_base, indexAxis: 'y', scales: { x: { ticks: { color: txt, font: { size: 10 }, callback: v => '$' + Math.round(v).toLocaleString('es-AR') }, grid: { color: grid } }, y: { ticks: { color: txt, font: { size: 10 } }, grid: { color: 'transparent' } } } }
       });
     }
 
@@ -592,7 +583,7 @@ function buildCharts() {
     if (cdEl) {
       chartInstances['cd'+idx] = new Chart(cdEl, {
         type: 'doughnut',
-        data: { labels: names, datasets: [{ data: spends, backgroundColor: COLORS.map(c => c + 'cc'), borderColor: isDark ? '#1a1a26' : '#ffffff', borderWidth: 3 }] },
+        data: { labels: names, datasets: [{ data: spends, backgroundColor: COLORS.map(c => c + 'cc'), borderColor: isDark ? '#0a0a14' : '#f0f0ff', borderWidth: 3 }] },
         options: { plugins: { legend: { display: true, position: 'bottom', labels: { color: txt, font: { size: 10 }, boxWidth: 10, padding: 8 } } }, cutout: '65%' }
       });
     }
@@ -602,29 +593,34 @@ function buildCharts() {
     if (ccEl) {
       chartInstances['cc'+idx] = new Chart(ccEl, {
         type: 'bar',
-        data: { labels: names, datasets: [{ data: ctrs, backgroundColor: ctrs.map(c => c >= 2.5 ? '#00d4aa99' : c >= 1.5 ? '#ffd16699' : '#ff4d6d99'), borderRadius: 6 }] },
+        data: { labels: names, datasets: [{ data: ctrs, backgroundColor: ctrs.map(c => c >= 2.5 ? '#34d39999' : c >= 1.5 ? '#fbbf2499' : '#f8717199'), borderRadius: 6 }] },
         options: opts_base
       });
     }
 
-    // Bar — ROAS
-    const crEl = document.getElementById('cr-' + idx);
-    if (crEl) {
-      chartInstances['cr'+idx] = new Chart(crEl, {
-        type: 'bar',
-        data: { labels: names, datasets: [{ data: roas_vals, backgroundColor: roas_vals.map(r => r >= 4 ? '#00d4aa99' : r >= 2 ? '#ffd16699' : '#ff4d6d99'), borderRadius: 6 }] },
-        options: { ...opts_base, plugins: { ...opts_base.plugins, annotation: {} } }
-      });
-    }
+    // Bar — ROAS (solo si hay datos)
+    if (has_roas) {
+      const crEl = document.getElementById('cr-' + idx);
+      if (crEl) {
+        chartInstances['cr'+idx] = new Chart(crEl, {
+          type: 'bar',
+          data: { labels: names, datasets: [{ data: roas_vals, backgroundColor: roas_vals.map(r => r >= 4 ? '#34d39999' : r >= 2 ? '#fbbf2499' : '#f8717199'), borderRadius: 6 }] },
+          options: opts_base
+        });
+      }
 
-    // Bar — Hook Rate
-    const chEl = document.getElementById('ch-' + idx);
-    if (chEl) {
-      chartInstances['ch'+idx] = new Chart(chEl, {
-        type: 'bar',
-        data: { labels: names, datasets: [{ data: hooks, backgroundColor: hooks.map(h => h >= 40 ? '#00d4aa99' : h >= 25 ? '#ffd16699' : h > 0 ? '#ff4d6d99' : '#44444499'), borderRadius: 6 }] },
-        options: opts_base
-      });
+      // Bar — Inversión vs CTR (bubble-like comparison)
+      const cbEl = document.getElementById('cb-' + idx);
+      if (cbEl) {
+        chartInstances['cb'+idx] = new Chart(cbEl, {
+          type: 'bar',
+          data: { labels: names, datasets: [
+            { label: 'CTR %', data: ctrs, backgroundColor: '#a78bfa99', borderRadius: 6, yAxisID: 'y' },
+            { label: 'ROAS', data: roas_vals, backgroundColor: '#34d39966', borderRadius: 6, yAxisID: 'y2' }
+          ]},
+          options: { ...opts_base, plugins: { legend: { display: true, labels: { color: txt, font: { size: 10 }, boxWidth: 10 } } }, scales: { x: { ticks: { color: txt, font: { size: 10 } }, grid: { color: grid } }, y: { ticks: { color: txt, font: { size: 10 } }, grid: { color: grid }, position: 'left' }, y2: { ticks: { color: txt, font: { size: 10 } }, grid: { display: false }, position: 'right' } } }
+        });
+      }
     }
   });
 }
