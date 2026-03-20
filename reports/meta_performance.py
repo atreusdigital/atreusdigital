@@ -83,12 +83,8 @@ def _analyze_campaigns(campaigns: list) -> dict:
 
 
 def build_report(days_back: int = 7, account_name: str = "", account_id: str = "") -> dict:
-    import os
-    if account_id:
-        os.environ["META_AD_ACCOUNT_ID"] = account_id
-
-    summary = get_account_summary(days_back)
-    campaigns = get_campaign_metrics(days_back)
+    summary = get_account_summary(days_back, account_id=account_id or None)
+    campaigns = get_campaign_metrics(days_back, account_id=account_id or None)
 
     campaign_rows = []
     for c in campaigns:

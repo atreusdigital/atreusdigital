@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adsinsights import AdsInsights
 from integrations.meta_ads.client import get_ad_account
 
@@ -24,8 +23,8 @@ def _date_range(days_back: int) -> dict:
     return {"since": str(start), "until": str(end)}
 
 
-def get_campaign_metrics(days_back: int = 30) -> list[dict]:
-    account = get_ad_account()
+def get_campaign_metrics(days_back: int = 30, account_id: str = None) -> list[dict]:
+    account = get_ad_account(account_id)
     params = {
         "time_range": _date_range(days_back),
         "level": "campaign",
@@ -35,8 +34,8 @@ def get_campaign_metrics(days_back: int = 30) -> list[dict]:
     return [dict(row) for row in insights]
 
 
-def get_account_summary(days_back: int = 30) -> dict:
-    account = get_ad_account()
+def get_account_summary(days_back: int = 30, account_id: str = None) -> dict:
+    account = get_ad_account(account_id)
     params = {
         "time_range": _date_range(days_back),
         "level": "account",

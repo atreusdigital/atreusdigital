@@ -19,10 +19,9 @@ OUTPUT_DIR = Path(__file__).parent.parent / "output"
 
 
 def fetch_account_data(account_id: str, account_name: str, days_back: int) -> dict:
-    os.environ["META_AD_ACCOUNT_ID"] = account_id
-    summary = get_account_summary(days_back)
-    campaigns = get_campaign_metrics(days_back)
-    top_ads = get_top_ads(days_back, top_n=5)
+    summary = get_account_summary(days_back, account_id=account_id)
+    campaigns = get_campaign_metrics(days_back, account_id=account_id)
+    top_ads = get_top_ads(days_back, top_n=5, account_id=account_id)
 
     campaign_rows = []
     for c in campaigns:
