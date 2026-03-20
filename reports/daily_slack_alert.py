@@ -27,6 +27,7 @@ SLACK_CHANNELS = {
     "Techos JAC":         "C06RZ096MPB",
     "Dr. Gonzalo García": "C0711NWE9SR",
     "DLD Translation HUB":"C09440C1URE",
+    "Damian Pelu":        "C07MB10HTQT",
 }
 
 CLIENT_EMOJIS = {

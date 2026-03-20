@@ -9,3 +9,6 @@ echo "=== $(date) ===" >> $LOG
 
 # Dashboard HTML
 /usr/bin/python3 -m reports.html_dashboard --days 7 >> $LOG 2>&1
+
+# Resumen semanal en Slack (#paid-media)
+/usr/bin/python3 -m reports.weekly_slack_summary --days 7 >> $LOG 2>&1
