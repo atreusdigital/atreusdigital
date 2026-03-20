@@ -3,6 +3,23 @@ from shared.config import NOTION_TOKEN, NOTION_REPORTS_DATABASE_ID
 
 NICOLAS_ID = "46859857-ad41-4cfa-a6f1-4104103d4cc7"
 
+# Mapeo de nombre de cliente → valor del select en Notion (formato UPPERCASE-HYPHEN)
+CLIENT_SELECT = {
+    "Flower Time": "FLOWER-TIME",
+    "Séfora Lencería": "SEFORA-LENCERIA",
+    "IKA Indumentaria": "IKA-INDUMENTARIA",
+    "Meryjane Clothing": "MERYJANE-CLOTHING",
+    "Kitana Lencería": "KITANA-LENCERIA",
+    "Salón del Peinador": "SALON-DEL-PEINADOR",
+    "Nonna Vita": "NONNA-VITA",
+    "Hey Donuts": "HEY-DONUTS",
+    "Techos JAC": "TECHOS-JAC",
+    "Dr. Gonzalo García": "DR.-GONZALO-GARCIA",
+    "DLD Translation HUB": "DLD-TRANSLATION-HUB",
+    "Damian Pelu": "DAMIAN-PELU",
+    "Casa Fuegos": "CASA-FUEGOS",
+}
+
 CLIENT_EMOJIS = {
     "Flower Time": "🌸",
     "Séfora Lencería": "👙",
@@ -157,41 +174,23 @@ def publish_report(report: dict) -> str:
             blocks.append(_bullet(r))
 
     # ── PROPIEDADES ──
+    client_select = CLIENT_SELECT.get(name)
     properties = {
-        "title": {"title": [{"text": {"content": title}}]},
+        "Nombre": {"title": [{"text": {"content": title}}]},
+        "A cargo de": {"people": [{"id": NICOLAS_ID}]},
+        "Estado": {"select": {"name": "Completado"}},
+        "Período": {"rich_text": [{"text": {"content": period}}]},
+        "Tipo": {"select": {"name": "Resumen semanal"}},
     }
+    if client_select:
+        properties["Cliente"] = {"select": {"name": client_select}}
 
-    # Crear página con ícono como emoji de página (no en el título)
-    try:
-        page = notion.pages.create(
-            parent={"database_id": NOTION_REPORTS_DATABASE_ID},
-            icon={"type": "emoji", "emoji": emoji},
-            properties=properties,
-            children=blocks,
-        )
-    except Exception:
-        page = notion.pages.create(
-            parent={"database_id": NOTION_REPORTS_DATABASE_ID},
-            icon={"type": "emoji", "emoji": emoji},
-            properties={"title": {"title": [{"text": {"content": title}}]}},
-            children=blocks,
-        )
-
-    # Agregar asignados como mención si es posible
-    try:
-        page_id = page["id"]
-        notion.pages.update(
-            page_id=page_id,
-            properties={
-                "Asignado a": {"people": [{"id": NICOLAS_ID}]},
-                "Cliente": {"rich_text": [{"text": {"content": name}}]},
-                "Estado": {"select": {"name": "Completado"}},
-                "Período": {"rich_text": [{"text": {"content": period}}]},
-                "Tipo": {"select": {"name": "Informe Semanal"}},
-            }
-        )
-    except Exception:
-        pass  # Si las propiedades no existen en la DB, se ignora
+    page = notion.pages.create(
+        parent={"database_id": NOTION_REPORTS_DATABASE_ID},
+        icon={"type": "emoji", "emoji": emoji},
+        properties=properties,
+        children=blocks,
+    )
 
     page_id = page["id"].replace("-", "")
     return f"https://notion.so/{page_id}"
